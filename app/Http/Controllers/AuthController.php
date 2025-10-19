@@ -48,7 +48,7 @@ class AuthController extends Controller
         return $this->success([
             'user' => new UserResource($user),
             'token' => $token,
-        ], 'Login successful');
+        ], 'Login successful', 201);
     }
 
     public function profile()
@@ -62,4 +62,31 @@ class AuthController extends Controller
         JWTAuth::invalidate(JWTAuth::getToken());
         return $this->success(null, 'Logout successful');
     }
+
+
+    public function refreshToken(Request $request)
+{
+    try {
+        $token = JWTAuth::getToken();
+
+        if (!$token) {
+            return $this->error('Token not provided', 400);
+        }
+
+        $newToken = JWTAuth::refresh($token);
+
+        $user = JWTAuth::setToken($newToken)->toUser();
+
+        return $this->success([
+            'user' => new UserResource($user),
+            'token' => $newToken,
+        ], 'Token refreshed successfully');
+
+    } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+        return $this->error('Invalid token', 401);
+    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        return $this->error('Token refresh failed', 500);
+    }
+}
+
 }
