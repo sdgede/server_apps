@@ -46,7 +46,6 @@ class AuthController extends Controller
         $user = auth()->user();
 
         return $this->success([
-            'user' => new UserResource($user),
             'token' => $token,
         ], 'Login successful', 201);
     }
@@ -78,9 +77,8 @@ class AuthController extends Controller
         $user = JWTAuth::setToken($newToken)->toUser();
 
         return $this->success([
-            'user' => new UserResource($user),
             'token' => $newToken,
-        ], 'Token refreshed successfully');
+        ], 'Token refreshed successfully', 201);
 
     } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
         return $this->error('Invalid token', 401);
