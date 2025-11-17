@@ -1,90 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use App\Http\Resources\UserResource;
-use App\Traits\ApiResponse;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\OfferController;
 
-class AuthController extends Controller
-{
-    use ApiResponse;
+// Redirect root ke dashboard
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
 
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+// Route login/register bawaan Laravel + AdminLTE
+Auth::routes();
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+// Semua menu admin wajib login
+Route::middleware('auth')->group(function () {
 
-        $token = JWTAuth::fromUser($user);
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        return $this->success([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ], 'User registered successfully', 201);
-    }
+    // CRUD Products
+    Route::resource('products', ProductController::class);
 
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+    // CRUD Users
+    Route::resource('users', UserController::class);
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return $this->error('Invalid credentials', 401);
-        }
+    // CRUD Payment Methods
+    Route::resource('payment', PaymentMethodController::class);
 
-        $user = auth()->user();
-
-        return $this->success([
-            'token' => $token,
-        ], 'Login successful', 201);
-    }
-
-    public function profile()
-    {
-        $user = auth()->user();
-        return $this->success(new UserResource($user), 'Profile retrieved successfully');
-    }
-
-    public function logout()
-    {
-        JWTAuth::invalidate(JWTAuth::getToken());
-        return $this->success(null, 'Logout successful');
-    }
-
-
-    public function refreshToken(Request $request)
-{
-    try {
-        $token = JWTAuth::getToken();
-
-        if (!$token) {
-            return $this->error('Token not provided', 400);
-        }
-
-        $newToken = JWTAuth::refresh($token);
-
-        $user = JWTAuth::setToken($newToken)->toUser();
-
-        return $this->success([
-            'token' => $newToken,
-        ], 'Token refreshed successfully', 201);
-
-    } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-        return $this->error('Invalid token', 401);
-    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-        return $this->error('Token refresh failed', 500);
-    }
-}
-
-}
+    // Offer
+    Route::get('offer/create', [OfferController::class, 'create'])->name('offer.create');
+    Route::post('offer/store', [OfferController::class, 'store'])->name('offer.store');
+});

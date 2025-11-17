@@ -2,10 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\OfferController;
 
 
 Route::get('/', function () {
@@ -14,7 +15,19 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::post('checkout', [CheckoutController::class, 'checkout']); // create order + transaction
-Route::post('transactions/{transaction}/confirm', [PaymentController::class, 'confirm']); // payment gateway callback
-Route::post('orders/{order}/ship', [ShipmentController::class, 'createShipment']);
+
+
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+// CRUD Products
+Route::resource('products', ProductController::class);
+
+// CRUD Users
+Route::resource('users', UserController::class);
+
+// CRUD Payment Methods
+Route::resource('payment', PaymentMethodController::class);
+
+// Create Offer
+Route::get('offer/create', [OfferController::class, 'create'])->name('offer.create');
+Route::post('offer/store', [OfferController::class, 'store'])->name('offer.store');

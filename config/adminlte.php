@@ -299,21 +299,35 @@ return [
     */
 
     'menu' => [
+    ['header' => 'MAIN MENU'],
+
     [
         'text' => 'Dashboard',
-        'url'  => 'home',
-        'icon' => 'fas fa-fw fa-home',
+        'icon' => 'fas fa-home',
+        'route' => 'dashboard'
+    ],
+    [
+        'text' => 'Products',
+        'icon' => 'fas fa-boxes',
+        'route' => 'products.index'
     ],
     [
         'text' => 'Users',
-        'url'  => 'users',
-        'icon' => 'fas fa-fw fa-users',
+        'icon' => 'fas fa-users',
+        'route' => 'users.index'
     ],
     [
-        'text' => 'Reports',
-        'url'  => 'reports',
-        'icon' => 'fas fa-fw fa-chart-bar',
+        'text' => 'Payment Methods',
+        'icon' => 'fas fa-credit-card',
+        'route' => 'payment.index'
     ],
+    [
+        'text' => 'Create Offer',
+        'icon' => 'fas fa-tags',
+        'route' => 'offer.create'
+    ],
+
+
 ],
 
 
